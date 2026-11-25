@@ -1,0 +1,196 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void selectiveRepeat()
+{
+    int total, N, nLost;
+
+    cout << "Enter total number of frames : ";
+    cin >> total;
+
+    cout << "Enter window size            : ";
+    cin >> N;
+
+    cout << "Number of frames to be lost : ";
+    cin >> nLost;
+
+    vector<bool> lossPending(total + 2, false);
+
+    for (int i = 0; i < nLost; i++)
+    {
+        int f;
+        cout << " Lost frame " << i + 1 << " : ";
+        cin >> f;
+
+        if (f >= 1 && f <= total)
+            lossPending[f] = true;
+    }
+
+    vector<bool> acked(total + 2, false);
+    vector<bool> got(total + 2, false);
+
+    int base = 1, next = 1;
+    int deliver = 1;
+    int sent = 0;
+
+    auto receive = [&](int f)
+    {
+        got[f] = true;
+
+        if (f == deliver)
+        {
+            cout << "Receiver : frame " << f
+                 << " in order, delivered\n";
+
+            deliver++;
+
+            while (deliver <= total && got[deliver])
+            {
+                cout << "Receiver : buffered frame "
+                     << deliver << " delivered\n";
+                deliver++;
+            }
+        }
+        else
+        {
+            cout << "Receiver : frame " << f
+                 << " out of order, buffered (waiting for "
+                 << deliver << ")\n";
+        }
+
+        cout << "Receiver : ACK " << f << " sent\n";
+
+        acked[f] = true;
+
+        int old = base;
+
+        while (base <= total && acked[base])
+            base++;
+
+        if (base != old)
+        {
+            if (base <= total)
+                cout << "Window = [" << base << " - "
+                     << min(base + N - 1, total) << "]\n";
+            else
+                cout << "Window : all frames acknowledged\n";
+        }
+    };
+
+    cout << "\nWindow = [" << base << " - "
+         << min(base + N - 1, total) << "]\n\n";
+
+    while (base <= total)
+    {
+        if (next < base + N && next <= total)
+        {
+            cout << "Sender     : frame " << next << " sent\n";
+            sent++;
+
+            if (lossPending[next])
+            {
+                lossPending[next] = false;
+                cout << "            frame " << next
+                     << " LOST in transit\n";
+            }
+            else
+            {
+                receive(next);
+            }
+
+            next++;
+        }
+        else
+        {
+            int end = min(base + N - 1, total);
+            cout << "\n";
+
+            for (int f = base; f <= end; f++)
+            {
+                if (!acked[f])
+                {
+                    cout << "Sender    : timeout for frame "
+                         << f << ", resending only frame "
+                         << f << "\n";
+
+                    sent++;
+                    receive(f);
+                }
+            }
+
+            cout << "\n";
+        }
+    }
+
+    cout << "\nTotal frames        : " << total;
+    cout << "\nTotal transmissions : " << sent;
+    cout << "\nRetransmissions     : " << sent - total << "\n";
+}
+
+int main()
+{
+    cout << "SELECTIVE REPEAT ARQ\n\n";
+    selectiveRepeat();
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Selective Repeat bhi ek sliding window protocol hai.
+
+
+
+Sender multiple frames ek saath send kar sakta hai.
+
+
+
+Receiver out-of-order frames ko buffer mein store kar sakta hai.
+
+
+
+Har frame ka individual ACK diya jata hai.
+
+
+
+Agar frame lost ho, toh sirf wahi frame retransmit hota hai.
+
+
+
+Isliye Go Back N ke comparison mein bandwidth efficient hota hai.

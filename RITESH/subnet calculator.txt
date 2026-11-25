@@ -1,0 +1,310 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <cmath>
+using namespace std;
+
+typedef unsigned int u32;
+
+// Convert IP address to 32-bit number
+bool parseIP(const string &s, u32 &ip)
+{
+    int p[4], n = 0;
+    stringstream ss(s);
+    string part;
+
+    while (getline(ss, part, '.'))
+    {
+        if (n == 4 || part.empty() || part.size() > 3)
+            return false;
+
+        for (char c : part)
+            if (c < '0' || c > '9')
+                return false;
+
+        int v = stoi(part);
+        if (v > 255)
+            return false;
+
+        p[n++] = v;
+    }
+
+    if (n != 4)
+        return false;
+
+    ip = ((u32)p[0] << 24) | (p[1] << 16)
+       | (p[2] << 8) | p[3];
+
+    return true;
+}
+
+// Convert 32-bit number to dotted decimal
+string toDotted(u32 x)
+{
+    return to_string((x >> 24) & 255) + "." +
+           to_string((x >> 16) & 255) + "." +
+           to_string((x >> 8) & 255) + "." +
+           to_string(x & 255);
+}
+
+// Convert 32-bit number to dotted binary
+string toBinary(u32 x)
+{
+    string r;
+
+    for (int i = 31; i >= 0; i--)
+    {
+        r += ((x >> i) & 1) ? '1' : '0';
+
+        if (i % 8 == 0 && i != 0)
+            r += '.';
+    }
+
+    return r;
+}
+
+char getClass(u32 ip)
+{
+    int first = ip >> 24;
+
+    if (first < 128) return 'A';
+    if (first < 192) return 'B';
+    if (first < 224) return 'C';
+    if (first < 240) return 'D';
+
+    return 'E';
+}
+
+string getType(u32 ip)
+{
+    int a = ip >> 24;
+    int b = (ip >> 16) & 255;
+
+    if (a == 10)
+        return "Private";
+
+    if (a == 172 && b >= 16 && b <= 31)
+        return "Private";
+
+    if (a == 192 && b == 168)
+        return "Private";
+
+    if (a == 127)
+        return "Loopback";
+
+    if (a == 169 && b == 254)
+        return "Link-local";
+
+    return "Public";
+}
+
+int main()
+{
+    cout << "SUBNET CALCULATOR\n\n";
+
+    string s;
+    u32 ip;
+    int prefix;
+
+    cout << "Enter IP address            : ";
+    cin >> s;
+
+    if (!parseIP(s, ip))
+    {
+        cout << "Invalid IP address\n";
+        return 0;
+    }
+
+    cout << "Enter prefix length (0-32) : ";
+    cin >> prefix;
+
+    if (prefix < 0 || prefix > 32)
+    {
+        cout << "Invalid prefix length\n";
+        return 0;
+    }
+
+    u32 mask = (prefix == 0) ? 0 : (0xFFFFFFFFu << (32 - prefix));
+    u32 wildcard = ~mask;
+    u32 network = ip & mask;
+    u32 bcast = network | wildcard;
+
+    double total = pow(2.0, 32 - prefix);
+    double usable = (prefix >= 31) ?
+                    (prefix == 32 ? 1 : 2) : total - 2;
+
+    u32 first = (prefix >= 31) ? network : network + 1;
+    u32 last = (prefix >= 31) ? bcast : bcast - 1;
+
+    cout << "\n-------- RESULT --------\n";
+    cout << "IP address        : " << toDotted(ip) << "/" << prefix << "\n";
+    cout << "IP (binary)       : " << toBinary(ip) << "\n";
+    cout << "Class             : " << getClass(ip) << "\n";
+    cout << "Type              : " << getType(ip) << "\n";
+    cout << "Subnet mask       : " << toDotted(mask) << "\n";
+    cout << "Mask (binary)     : " << toBinary(mask) << "\n";
+    cout << "Wildcard mask     : " << toDotted(wildcard) << "\n";
+    cout << "Network address   : " << toDotted(network) << "\n";
+    cout << "Broadcast address : " << toDotted(bcast) << "\n";
+    cout << "First host        : " << toDotted(first) << "\n";
+    cout << "Last host         : " << toDotted(last) << "\n";
+    cout << "Total addresses   : " << (long long)total << "\n";
+    cout << "Usable hosts      : " << (long long)usable << "\n";
+
+    // Divide network into equal subnets
+    int choice;
+
+    cout << "\nDivide this network into equal subnets? (1 = yes, 0 = no) : ";
+    cin >> choice;
+
+    if (choice == 1)
+    {
+        int n;
+
+        cout << "Number of subnets required : ";
+        cin >> n;
+
+        int bits = 0;
+
+        while ((1 << bits) < n)
+            bits++;
+
+        int newPrefix = prefix + bits;
+
+        if (n < 1 || newPrefix > 30)
+        {
+            cout << "Cannot create " << n
+                 << " subnets from /" << prefix << "\n";
+            return 0;
+        }
+
+        u32 newMask = 0xFFFFFFFFu << (32 - newPrefix);
+        u32 size = 1u << (32 - newPrefix);
+        int count = 1 << bits;
+
+        cout << "\nBits borrowed          : " << bits;
+        cout << "\nNew prefix length      : /" << newPrefix;
+        cout << "\nNew subnet mask        : " << toDotted(newMask);
+        cout << "\nSubnets created        : " << count;
+        cout << "\nHosts per subnet       : " << size - 2 << "\n\n";
+
+        cout << left << setw(5) << "No."
+             << setw(19) << "Network"
+             << setw(33) << "Usable range"
+             << "Broadcast\n";
+
+        for (int i = 0; i < count; i++)
+        {
+            u32 net = network + i * size;
+
+            string netStr = toDotted(net) + "/" + to_string(newPrefix);
+            string rangeStr = toDotted(net + 1) + " - "
+                            + toDotted(net + size - 2);
+
+            cout << left << setw(5) << i + 1
+                 << setw(19) << netStr
+                 << setw(33) << rangeStr
+                 << toDotted(net + size - 1) << "\n";
+        }
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
+Distance Vector routing ek routing algorithm hai jo shortest path find karta hai.
+
+
+
+Har router apne neighbouring routers se routing information share karta hai.
+
+
+
+Router distance aur next hop ke basis par routing table update karta hai.
+
+
+
+Is program mein Bellman-Ford type updating technique use ki gayi hai.
+
+
+
+Iterations tab tak chalte hain jab tak routing tables stable nahi ho jaati.
+
+
+
+Finally, har router ka destination, next hop aur cost show hota hai.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

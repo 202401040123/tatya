@@ -1,0 +1,131 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#ifdef _WIN32
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #pragma comment(lib, "ws2_32.lib")
+  typedef int socklen_t;
+  #define CLOSESOCK closesocket
+#else
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
+  #include <unistd.h>
+  #define CLOSESOCK close
+#endif
+using namespace std;
+
+#define PORT 9090
+
+int main()
+{
+#ifdef _WIN32
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
+    cout << "UDP CLIENT\n\n";
+
+    // Create UDP socket
+    int s = socket(AF_INET, SOCK_DGRAM, 0);
+
+    sockaddr_in srv;
+    memset(&srv, 0, sizeof(srv));
+    srv.sin_family = AF_INET;
+    srv.sin_port = htons(PORT);
+    srv.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    socklen_t len = sizeof(srv);
+
+    cout << "Sending to server 127.0.0.1:"
+         << PORT << "\n\n";
+
+    // Send datagrams and receive replies
+    string msg;
+    char buf[1024];
+
+    while (true)
+    {
+        cout << "Client : ";
+        getline(cin, msg);
+
+        sendto(s, msg.c_str(), (int)msg.size(), 0,
+               (sockaddr*)&srv, len);
+
+        int n = recvfrom(s, buf, sizeof(buf) - 1, 0,
+                        (sockaddr*)&srv, &len);
+
+        if (n <= 0)
+            break;
+
+        buf[n] = '\0';
+        cout << "Server : " << buf << "\n";
+
+        if (msg == "bye")
+            break;
+    }
+
+    CLOSESOCK(s);
+
+    cout << "\nClient closed\n";
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+UDP Client server ko messages send aur receive karta hai.
+
+
+
+Is program mein SOCK_DGRAM socket create kiya jata hai.
+
+
+
+Server ke IP address aur port 9090 ko configure kiya jata hai.
+
+
+
+sendto() se message server ko send hota hai.
+
+
+
+recvfrom() se server ka reply receive hota hai.
+
+
+
+UDP mein connection establish nahi hota, isliye communication simple aur fast hota hai.

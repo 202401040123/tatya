@@ -1,0 +1,144 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+// CRC
+string modTwoDivide(string bits, const string &gen)
+{
+    int g = gen.size();
+
+    for (int i = 0; i + g <= (int)bits.size(); i++)
+        if (bits[i] == '1')
+            for (int k = 0; k < g; k++)
+                bits[i + k] = (bits[i + k] == gen[k]) ? '0' : '1';
+
+    return bits.substr(bits.size() - (g - 1));
+}
+
+bool isZero(const string &s)
+{
+    for (char ch : s)
+        if (ch == '1')
+            return false;
+
+    return true;
+}
+
+void crcScheme()
+{
+    string data, gen;
+
+    cout << "Enter data bits      : "; cin >> data;
+    cout << "Enter generator bits : "; cin >> gen;
+
+    string padded = data + string(gen.size() - 1, '0');
+    string rem = modTwoDivide(padded, gen);
+    string sent = data + rem;
+
+    cout << "\n--- SENDER ---\n";
+    cout << "Data after padding : " << padded << "\n";
+    cout << "CRC remainder      : " << rem << "\n";
+    cout << "Transmitted frame : " << sent << "\n";
+
+    string got;
+
+    cout << "\n--- RECEIVER ---\n";
+    cout << "Enter received frame : "; cin >> got;
+
+    string check = modTwoDivide(got, gen);
+
+    cout << "Remainder at receiver: " << check << "\n";
+
+    if (isZero(check))
+    {
+        cout << "Result : no error detected\n";
+        cout << "Data   : " << got.substr(0, got.size() - rem.size()) << "\n";
+        return;
+    }
+
+    cout << "Result : error detected\n";
+
+    for (int pos = 0; pos < (int)got.size(); pos++)
+    {
+        string trial = got;
+        trial[pos] = (trial[pos] == '0') ? '1' : '0';
+
+        if (isZero(modTwoDivide(trial, gen)))
+        {
+            cout << "Single-bit error at position "
+                 << pos + 1 << " (from left)\n";
+            cout << "Corrected frame : " << trial << "\n";
+            cout << "Data            : "
+                 << trial.substr(0, trial.size() - rem.size()) << "\n";
+            return;
+        }
+    }
+
+    cout << "Not a single-bit error, cannot correct\n";
+}
+
+int main()
+{
+    cout << "CYCLIC REDUNDANCY CHECK (CRC)\n\n";
+    crcScheme();
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CRC ek error detection technique hai jo data transmission mein errors check karti hai.
+
+
+
+Sender data ke end mein zeros add karta hai.
+
+
+
+Data ko generator polynomial se XOR division kiya jata hai.
+
+
+
+Jo remainder milta hai, use CRC bits ke roop mein data ke saath send kiya jata hai.
+
+
+
+Receiver same division perform karke remainder check karta hai.
+
+
+
+Agar remainder zero ho, toh error detect nahi hota.

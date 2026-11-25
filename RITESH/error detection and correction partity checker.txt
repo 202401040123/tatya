@@ -1,0 +1,168 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+// Two-dimensional parity (even)
+void parityScheme()
+{
+    int R, C;
+    cout << "Number of data rows    : "; cin >> R;
+    cout << "Number of data columns : "; cin >> C;
+
+    vector<string> data(R);
+    for (int i = 0; i < R; i++)
+    {
+        cout << "Enter row " << i + 1 << " (" << C << " bits) : ";
+        cin >> data[i];
+    }
+
+    vector<string> tx(R + 1, string(C + 1, '0'));
+
+    for (int i = 0; i < R; i++)
+        for (int j = 0; j < C; j++)
+            tx[i][j] = data[i][j];
+
+    for (int i = 0; i < R; i++)
+    {
+        int ones = 0;
+        for (int j = 0; j < C; j++)
+            ones += tx[i][j] - '0';
+
+        tx[i][C] = (ones % 2) ? '1' : '0';
+    }
+
+    for (int j = 0; j <= C; j++)
+    {
+        int ones = 0;
+        for (int i = 0; i < R; i++)
+            ones += tx[i][j] - '0';
+
+        tx[R][j] = (ones % 2) ? '1' : '0';
+    }
+
+    cout << "\n--- SENDER ---\nTransmitted frame:\n";
+    for (int i = 0; i <= R; i++)
+        cout << " " << tx[i] << "\n";
+
+    vector<string> rx(R + 1);
+    cout << "\n--- RECEIVER ---\n";
+
+    for (int i = 0; i <= R; i++)
+    {
+        cout << "Received row " << i + 1 << " : ";
+        cin >> rx[i];
+    }
+
+    vector<int> badRow, badCol;
+
+    for (int i = 0; i <= R; i++)
+    {
+        int ones = 0;
+        for (int j = 0; j <= C; j++)
+            ones += rx[i][j] - '0';
+
+        if (ones % 2)
+            badRow.push_back(i);
+    }
+
+    for (int j = 0; j <= C; j++)
+    {
+        int ones = 0;
+        for (int i = 0; i <= R; i++)
+            ones += rx[i][j] - '0';
+
+        if (ones % 2)
+            badCol.push_back(j);
+    }
+
+    if (badRow.empty() && badCol.empty())
+        cout << "\nResult : no error detected\n";
+
+    else if (badRow.size() == 1 && badCol.size() == 1)
+    {
+        int r = badRow[0], c = badCol[0];
+
+        cout << "\nResult : single-bit error detected\n";
+        cout << "Location : row " << r + 1
+             << ", column " << c + 1 << "\n";
+
+        rx[r][c] = (rx[r][c] == '0') ? '1' : '0';
+
+        cout << "Corrected frame:\n";
+        for (int i = 0; i <= R; i++)
+            cout << " " << rx[i] << "\n";
+    }
+    else
+        cout << "\nResult : multiple errors detected, cannot correct\n";
+
+    cout << "Recovered data:\n";
+    for (int i = 0; i < R; i++)
+        cout << "       " << rx[i].substr(0, C) << "\n";
+}
+
+int main()
+{
+    cout << "PARITY CHECK (TWO-DIMENSIONAL)\n\n";
+    parityScheme();
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Is program mein data ko rows aur columns mein divide kiya jata hai.
+
+
+
+Har row aur column ke liye parity bit calculate ki jaati hai.
+
+
+
+Humne even parity use ki hai, jisme total 1s even hone chahiye.
+
+
+
+Receiver side par parity dobara check ki jaati hai.
+
+
+
+Agar ek bit galat ho, toh uski row aur column identify ho sakti hai.
+
+
+
+Isse single-bit error detect aur correct kar sakte hain.

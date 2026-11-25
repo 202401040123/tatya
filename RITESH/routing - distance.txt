@@ -1,0 +1,143 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+const int INF = 999;
+
+int cost[10][10];
+int dist[10][10];
+int nxt[10][10];
+
+string val(int x)
+{
+    return x >= INF ? "INF" : to_string(x);
+}
+
+void printVectors(int n)
+{
+    cout << "        ";
+
+    for (int j = 0; j < n; j++)
+        cout << setw(5) << char('A' + j);
+
+    cout << "\n";
+
+    for (int i = 0; i < n; i++)
+    {
+        cout << " Router " << char('A' + i);
+
+        for (int j = 0; j < n; j++)
+            cout << setw(5) << val(dist[i][j]);
+
+        cout << "\n";
+    }
+}
+
+int main()
+{
+    cout << "DISTANCE VECTOR ROUTING\n\n";
+
+    int n;
+
+    cout << "Enter number of routers (2-10) : ";
+    cin >> n;
+
+    if (n < 2 || n > 10)
+    {
+        cout << "Invalid number of routers\n";
+        return 0;
+    }
+
+    cout << "Enter cost matrix (" << INF
+         << " = no direct link, 0 on diagonal)\n";
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+        {
+            cin >> cost[i][j];
+
+            if (i == j)
+                cost[i][j] = 0;
+
+            if (cost[i][j] < 0 || cost[i][j] > INF)
+                cost[i][j] = INF;
+        }
+
+    // Initial distance vectors
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+        {
+            dist[i][j] = cost[i][j];
+            nxt[i][j] = (cost[i][j] < INF) ? j : -1;
+        }
+
+    cout << "\nIteration 0 (initial vectors)\n";
+    printVectors(n);
+
+    int iter = 0;
+    bool changed = true;
+
+    while (changed)
+    {
+        changed = false;
+        iter++;
+
+        int old[10][10];
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                old[i][j] = dist[i][j];
+
+        for (int i = 0; i < n; i++)
+            for (int k = 0; k < n; k++)
+            {
+                if (k == i || cost[i][k] >= INF)
+                    continue;
+
+                for (int j = 0; j < n; j++)
+                    if (old[k][j] < INF &&
+                        cost[i][k] + old[k][j] < dist[i][j])
+                    {
+                        dist[i][j] = cost[i][k] + old[k][j];
+                        nxt[i][j] = k;
+                        changed = true;
+                    }
+            }
+
+        if (changed)
+        {
+            cout << "\nIteration " << iter << "\n";
+            printVectors(n);
+        }
+        else
+            cout << "\nIteration " << iter
+                 << " : no change, tables have converged\n";
+    }
+
+    cout << "\n------ FINAL ROUTING TABLES ------\n";
+
+    for (int i = 0; i < n; i++)
+    {
+        cout << "\nRouting table of router "
+             << char('A' + i) << "\n";
+
+        cout << " Destination     Next hop  Cost\n";
+
+        for (int j = 0; j < n; j++)
+        {
+            if (i == j)
+                continue;
+
+            cout << "      " << char('A' + j) << "            ";
+
+            if (nxt[i][j] < 0)
+                cout << "-           INF\n";
+            else
+                cout << char('A' + nxt[i][j])
+                     << "          " << dist[i][j] << "\n";
+        }
+    }
+
+    return 0;
+}

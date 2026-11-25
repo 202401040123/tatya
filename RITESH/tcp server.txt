@@ -1,0 +1,152 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#ifdef _WIN32
+  #include <winsock2.h>
+  #pragma comment(lib, "ws2_32.lib")
+  typedef int socklen_t;
+  #define CLOSESOCK closesocket
+#else
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <unistd.h>
+  #define CLOSESOCK close
+#endif
+using namespace std;
+
+#define PORT 8080
+
+int main()
+{
+#ifdef _WIN32
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
+    cout << "TCP SERVER\n\n";
+
+    // Create TCP socket
+    int srv = socket(AF_INET, SOCK_STREAM, 0);
+
+    // Bind to port 8080
+    sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons(PORT);
+
+    int opt = 1;
+    setsockopt(srv, SOL_SOCKET, SO_REUSEADDR,
+               (const char*)&opt, sizeof(opt));
+
+    bind(srv, (sockaddr*)&addr, sizeof(addr));
+
+    // Listen and accept
+    listen(srv, 1);
+
+    cout << "Server listening on port " << PORT << " ...\n";
+
+    sockaddr_in cli;
+    socklen_t len = sizeof(cli);
+
+    int c = accept(srv, (sockaddr*)&cli, &len);
+
+    cout << "Client connected\n\n";
+
+    // Receive messages and reply
+    char buf[1024];
+
+    while (true)
+    {
+        int n = recv(c, buf, sizeof(buf) - 1, 0);
+
+        if (n <= 0)
+            break;
+
+        buf[n] = '\0';
+        string msg(buf);
+
+        cout << "Client : " << msg << "\n";
+
+        string reply = (msg == "bye") ?
+                       "Goodbye" : "Server received: " + msg;
+
+        send(c, reply.c_str(), (int)reply.size(), 0);
+
+        cout << "Server : " << reply << "\n";
+
+        if (msg == "bye")
+            break;
+    }
+
+    CLOSESOCK(c);
+    CLOSESOCK(srv);
+
+    cout << "\nConnection closed\n";
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TCP Server client ke connection ka wait karta hai.
+
+
+
+Is program mein socket() se TCP socket create kiya jata hai.
+
+
+
+bind() server ko port 8080 se connect karta hai aur listen() incoming connections ka wait karta hai.
+
+
+
+accept() client ka connection accept karta hai.
+
+
+
+Server recv() se message receive aur send() se reply karta hai.
+
+
+
+TCP reliable communication provide karta hai, jisme data proper order mein receive hota hai.

@@ -1,0 +1,136 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#ifdef _WIN32
+  #include <winsock2.h>
+  #pragma comment(lib, "ws2_32.lib")
+  typedef int socklen_t;
+  #define CLOSESOCK closesocket
+#else
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <unistd.h>
+  #define CLOSESOCK close
+#endif
+using namespace std;
+
+#define PORT 9090
+
+int main()
+{
+#ifdef _WIN32
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
+    cout << "UDP SERVER\n\n";
+
+    // Create UDP socket
+    int s = socket(AF_INET, SOCK_DGRAM, 0);
+
+    // Bind to port 9090
+    sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons(PORT);
+
+    bind(s, (sockaddr*)&addr, sizeof(addr));
+
+    cout << "Server waiting on port " << PORT << " ...\n\n";
+
+    // Receive and reply to datagrams
+    char buf[1024];
+    sockaddr_in cli;
+    socklen_t len = sizeof(cli);
+
+    while (true)
+    {
+        int n = recvfrom(s, buf, sizeof(buf) - 1, 0,
+                         (sockaddr*)&cli, &len);
+
+        if (n <= 0)
+            break;
+
+        buf[n] = '\0';
+        string msg(buf);
+
+        cout << "Client : " << msg << "\n";
+
+        string reply = (msg == "bye") ?
+                       "Goodbye" : "Server received: " + msg;
+
+        sendto(s, reply.c_str(), (int)reply.size(), 0,
+               (sockaddr*)&cli, len);
+
+        cout << "Server : " << reply << "\n";
+
+        if (msg == "bye")
+            break;
+    }
+
+    CLOSESOCK(s);
+
+    cout << "\nServer closed\n";
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+UDP Server connection establish kiye bina client ke messages receive karta hai.
+
+
+
+Is program mein UDP socket SOCK_DGRAM ke through create hota hai.
+
+
+
+bind() server ko port 9090 par attach karta hai.
+
+
+
+recvfrom() client ka message receive karta hai aur client address bhi deta hai.
+
+
+
+sendto() ke through server client ko reply bhejta hai.
+
+
+
+UDP fast aur connectionless protocol hai, lekin delivery guarantee nahi deta.

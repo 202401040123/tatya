@@ -1,0 +1,230 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 999;
+
+string val(int x)
+{
+    return x >= INF ? "INF" : to_string(x);
+}
+
+int main()
+{
+    cout << "LINK STATE ROUTING\n\n";
+
+    int n, cost[10][10];
+
+    cout << "Enter number of routers (2-10) : ";
+    cin >> n;
+
+    if (n < 2 || n > 10)
+    {
+        cout << "Invalid number of routers\n";
+        return 0;
+    }
+
+    cout << "Enter cost matrix (" << INF
+         << " = no direct link, 0 on diagonal)\n";
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+        {
+            cin >> cost[i][j];
+
+            if (i == j)
+                cost[i][j] = 0;
+
+            if (cost[i][j] < 0 || cost[i][j] > INF)
+                cost[i][j] = INF;
+        }
+
+    char c;
+
+    cout << "Enter source router (A-"
+         << char('A' + n - 1) << ") : ";
+    cin >> c;
+
+    int src = toupper(c) - 'A';
+
+    if (src < 0 || src >= n)
+    {
+        cout << "Invalid source router\n";
+        return 0;
+    }
+
+    // Link State Database
+    cout << "\nLink state database (known to every router)\n";
+
+    for (int i = 0; i < n; i++)
+        for (int j = i + 1; j < n; j++)
+            if (cost[i][j] < INF)
+                cout << " " << char('A' + i)
+                     << " - " << char('A' + j)
+                     << " : " << cost[i][j] << "\n";
+
+    // Dijkstra's algorithm
+    int d[10], prev[10];
+    bool done[10];
+
+    for (int i = 0; i < n; i++)
+    {
+        d[i] = INF;
+        prev[i] = -1;
+        done[i] = false;
+    }
+
+    d[src] = 0;
+
+    cout << "\nDijkstra's algorithm from router "
+         << char('A' + src) << "\n";
+
+    for (int step = 1; step <= n; step++)
+    {
+        int u = -1;
+
+        for (int i = 0; i < n; i++)
+            if (!done[i] && d[i] < INF &&
+                (u == -1 || d[i] < d[u]))
+                u = i;
+
+        if (u == -1)
+            break;
+
+        done[u] = true;
+
+        for (int v = 0; v < n; v++)
+            if (!done[v] && cost[u][v] < INF &&
+                d[u] + cost[u][v] < d[v])
+            {
+                d[v] = d[u] + cost[u][v];
+                prev[v] = u;
+            }
+
+        cout << "Step " << step << " : add "
+             << char('A' + u) << "   N' = {";
+
+        bool first = true;
+
+        for (int i = 0; i < n; i++)
+            if (done[i])
+            {
+                cout << (first ? "" : ",")
+                     << char('A' + i);
+                first = false;
+            }
+
+        cout << "}\n";
+        cout << "        ";
+
+        if (step == n)
+            cout << "(all routers are in N')";
+
+        for (int v = 0; v < n; v++)
+            if (!done[v])
+            {
+                cout << char('A' + v) << "=" << val(d[v]);
+
+                if (prev[v] >= 0)
+                    cout << "(" << char('A' + prev[v]) << ")";
+
+                cout << "   ";
+            }
+
+        cout << "\n";
+    }
+
+    cout << "\n------ SHORTEST PATHS FROM ROUTER "
+         << char('A' + src) << " ------\n";
+
+    cout << " Destination      Cost  Path\n";
+
+    for (int j = 0; j < n; j++)
+    {
+        if (j == src)
+            continue;
+
+        cout << "       " << char('A' + j)
+             << "         " << left << setw(6)
+             << val(d[j]) << right;
+
+        if (d[j] >= INF)
+            cout << "unreachable\n";
+        else
+        {
+            vector<int> path;
+
+            for (int x = j; x != -1; x = prev[x])
+                path.push_back(x);
+
+            reverse(path.begin(), path.end());
+
+            for (size_t k = 0; k < path.size(); k++)
+                cout << (k ? " -> " : "")
+                     << char('A' + path[k]);
+
+            cout << "\n";
+        }
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Link State routing mein routers network topology ki information maintain karte hain.
+
+
+
+Har router network ke links aur unki costs ki information collect karta hai.
+
+
+
+Is information se network ka Link State Database create hota hai.
+
+
+
+Dijkstra's algorithm shortest path calculate karta hai.
+
+
+
+Program source router se har destination ki minimum cost find karta hai.
+
+
+
+Finally, shortest path aur distance show ki jaati hai.

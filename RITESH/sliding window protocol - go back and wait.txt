@@ -1,0 +1,155 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void goBackN()
+{
+    int total, N, nLost;
+
+    cout << "Enter total number of frames : ";
+    cin >> total;
+
+    cout << "Enter window size             : ";
+    cin >> N;
+
+    cout << "Number of frames to be lost : ";
+    cin >> nLost;
+
+    vector<bool> lossPending(total + 2, false);
+
+    for (int i = 0; i < nLost; i++)
+    {
+        int f;
+        cout << " Lost frame " << i + 1 << " : ";
+        cin >> f;
+
+        if (f >= 1 && f <= total)
+            lossPending[f] = true;
+    }
+
+    int base = 1;
+    int next = 1;
+    int expected = 1;
+    int sent = 0;
+
+    cout << "\nWindow = [" << base << " - "
+         << min(base + N - 1, total) << "]\n\n";
+
+    while (base <= total)
+    {
+        if (next < base + N && next <= total)
+        {
+            cout << "Sender     : frame " << next << " sent\n";
+            sent++;
+
+            if (lossPending[next])
+            {
+                lossPending[next] = false;
+                cout << "            frame " << next
+                     << " LOST in transit\n";
+            }
+            else if (next == expected)
+            {
+                cout << "Receiver : frame " << next
+                     << " accepted, ACK " << next << " sent\n";
+
+                expected++;
+                base = expected;
+
+                if (base <= total)
+                    cout << "Window = [" << base << " - "
+                         << min(base + N - 1, total) << "]\n";
+                else
+                    cout << "Window : all frames acknowledged\n";
+            }
+            else
+            {
+                cout << "Receiver : frame " << next
+                     << " out of order (expected "
+                     << expected << "), discarded\n";
+            }
+
+            next++;
+        }
+        else
+        {
+            cout << "\nSender     : timeout for frame " << base << "\n";
+            cout << "Sender     : going back to frame "
+                 << base << ", resending from there\n\n";
+
+            next = base;
+        }
+    }
+
+    cout << "\nTotal frames           : " << total;
+    cout << "\nTotal transmissions : " << sent;
+    cout << "\nRetransmissions        : " << sent - total << "\n";
+}
+
+int main()
+{
+    cout << "GO BACK N ARQ\n\n";
+    goBackN();
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Go Back N ek sliding window protocol hai.
+
+
+
+Sender ek window mein multiple frames send kar sakta hai.
+
+
+
+Receiver frames ko sequence mein accept karta hai.
+
+
+
+Agar koi frame lost ho jaye, toh uske baad ke out-of-order frames discard ho sakte hain.
+
+
+
+Timeout hone par lost frame se lekar saare pending frames retransmit hote hain.
+
+
+
+Isse Stop and Wait ke comparison mein transmission efficiency improve hoti hai.

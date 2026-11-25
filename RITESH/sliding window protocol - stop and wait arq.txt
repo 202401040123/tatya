@@ -1,0 +1,145 @@
+#include <iostream>
+using namespace std;
+
+void stopAndWait()
+{
+    int total;
+    cout << "Enter total number of frames : ";
+    cin >> total;
+
+    cout << "(for every attempt enter 1 if lost, 0 if delivered)\n";
+
+    int seq = 0;
+    int expected = 0;
+    int sent = 0;
+
+    for (int f = 1; f <= total; f++)
+    {
+        bool acked = false;
+        int attempt = 0;
+
+        while (!acked)
+        {
+            attempt++;
+            sent++;
+
+            cout << "\nSender   : sending frame " << f
+                 << " (seq " << seq << ")";
+
+            if (attempt > 1)
+                cout << " [retransmission]";
+
+            cout << "\n";
+
+            int lost;
+            cout << " Frame lost? (1/0) : ";
+            cin >> lost;
+
+            if (lost)
+            {
+                cout << "Sender  : timeout, no ACK received for frame "
+                     << f << "\n";
+                continue;
+            }
+
+            if (seq == expected)
+            {
+                cout << "Receiver : frame " << f << " accepted\n";
+                expected = 1 - expected;
+            }
+            else
+            {
+                cout << "Receiver : duplicate of frame "
+                     << f << " discarded\n";
+            }
+
+            cout << "Receiver : ACK " << expected << " sent\n";
+
+            int ackLost;
+            cout << " ACK lost? (1/0)    : ";
+            cin >> ackLost;
+
+            if (ackLost)
+            {
+                cout << "Sender   : timeout, ACK "
+                     << expected << " not received\n";
+                continue;
+            }
+
+            cout << "Sender   : ACK " << expected
+                 << " received, frame " << f << " done\n";
+
+            seq = 1 - seq;
+            acked = true;
+        }
+    }
+
+    cout << "\nTotal frames        : " << total;
+    cout << "\nTotal transmissions : " << sent;
+    cout << "\nRetransmissions     : " << sent - total << "\n";
+}
+
+int main()
+{
+    cout << "STOP AND WAIT ARQ\n\n";
+    stopAndWait();
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Stop and Wait ek flow control aur error control protocol hai.
+
+
+
+Sender ek time par sirf ek frame send karta hai.
+
+
+
+Frame send karne ke baad sender ACK ka wait karta hai.
+
+
+
+Agar ACK nahi milta, toh timeout hone par frame retransmit hota hai.
+
+
+
+Sequence number 0 aur 1 use hote hain duplicate frames identify karne ke liye.
+
+
+
+Is protocol mein transmission simple hota hai, lekin speed comparatively slow hoti hai.

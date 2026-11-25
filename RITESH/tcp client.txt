@@ -1,0 +1,126 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#ifdef _WIN32
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #pragma comment(lib, "ws2_32.lib")
+  #define CLOSESOCK closesocket
+#else
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
+  #include <unistd.h>
+  #define CLOSESOCK close
+#endif
+using namespace std;
+
+#define PORT 8080
+
+int main()
+{
+#ifdef _WIN32
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
+#endif
+    cout << "TCP CLIENT\n\n";
+
+    // Create TCP socket
+    int s = socket(AF_INET, SOCK_STREAM, 0);
+
+    // Connect to server
+    sockaddr_in srv;
+    memset(&srv, 0, sizeof(srv));
+    srv.sin_family = AF_INET;
+    srv.sin_port = htons(PORT);
+    srv.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    if (connect(s, (sockaddr*)&srv, sizeof(srv)) < 0)
+    {
+        cout << "Connection failed. Is the server running?\n";
+        return 1;
+    }
+
+    cout << "Connected to server 127.0.0.1:"
+         << PORT << "\n\n";
+
+    // Send messages and receive replies
+    string msg;
+    char buf[1024];
+
+    while (true)
+    {
+        cout << "Client : ";
+        getline(cin, msg);
+
+        send(s, msg.c_str(), (int)msg.size(), 0);
+
+        int n = recv(s, buf, sizeof(buf) - 1, 0);
+
+        if (n <= 0)
+            break;
+
+        buf[n] = '\0';
+        cout << "Server : " << buf << "\n";
+
+        if (msg == "bye")
+            break;
+    }
+
+    CLOSESOCK(s);
+
+    cout << "\nConnection closed\n";
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+- TCP Client server ke saath connection establish karta hai.
+- Is program mein socket() se client socket create hota hai.
+- connect() function server ke IP address aur port se connect karta hai.
+- Client send() se message bhejta hai aur recv() se reply receive karta hai.
+- TCP connection-oriented aur reliable protocol hai.
+- Client bye message bhejkar communication close kar sakta hai.
