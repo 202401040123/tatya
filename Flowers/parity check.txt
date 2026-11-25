@@ -1,0 +1,69 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main()
+{
+    string data, received;
+    int ones = 0, parity;
+
+    cout << "Enter binary data: ";
+    cin >> data;
+
+    // Count number of 1s
+    for(int i = 0; i < data.length(); i++)
+    {
+        if(data[i] == '1')
+            ones++;
+    }
+
+    // Generate even parity bit
+    if(ones % 2 == 0)
+        parity = 0;
+    else
+        parity = 1;
+
+    cout << "Parity Bit = " << parity << endl;
+    cout << "Data Sent = " << data << parity << endl;
+
+    // Receiver
+    cout << "Enter received data: ";
+    cin >> received;
+
+    ones = 0;
+
+    // Count 1s in received data
+    for(int i = 0; i < received.length(); i++)
+    {
+        if(received[i] == '1')
+            ones++;
+    }
+
+    // Check parity
+    if(ones % 2 == 0)
+        cout << "No Error Detected";
+    else
+        cout << "Error Detected";
+
+    return 0;
+}
+
+Enter binary data: 1011
+Parity Bit = 1
+Data Sent = 10111
+
+
+Enter binary data: 1011
+Parity Bit = 1
+Data Sent = 10111
+Enter received data: 10111
+No Error Detected
+
+
+My practical is implementation of Parity Check for error detection. Parity Check is an error detection technique where an additional parity bit is added to the original binary data. I have used even parity, so the total number of 1s should be even.  
+
+In my program, first I take the binary data as input and count the number of 1s using a for loop. If the number of 1s is even, the parity bit is 0. If it is odd, the parity bit is 1. This makes the total number of 1s even. Then I display the data sent.  
+
+At the receiver side, I take the received data and again count the number of 1s. If the count is even, I display ‘No Error Detected’. If the count is odd, I display ‘Error Detected’.  
+
+This method can detect errors but cannot correct or locate the erroneous bit.

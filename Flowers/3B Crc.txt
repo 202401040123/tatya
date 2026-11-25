@@ -1,0 +1,108 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main()
+{
+    string data, key, temp, received;
+
+    cout << "Enter data: ";
+    cin >> data;
+
+    cout << "Enter generator: ";
+    cin >> key;
+
+    // Append zeros
+    temp = data;
+    for(int i = 0; i < key.length() - 1; i++)
+        temp = temp + "0";
+
+    // CRC division
+    for(int i = 0; i < data.length(); i++)
+    {
+        if(temp[i] == '1')
+        {
+            for(int j = 0; j < key.length(); j++)
+            {
+                if(temp[i+j] == key[j])
+                    temp[i+j] = '0';
+                else
+                    temp[i+j] = '1';
+            }
+        }
+    }
+
+    string remainder = temp.substr(data.length());
+
+    cout << "CRC Remainder = " << remainder << endl;
+
+    string transmitted = data + remainder;
+
+    cout << "Data Sent = " << transmitted << endl;
+
+    // Receiver
+    cout << "Enter received data: ";
+    cin >> received;
+
+    temp = received;
+
+    // Check received data
+    for(int i = 0; i <= received.length() - key.length(); i++)
+    {
+        if(temp[i] == '1')
+        {
+            for(int j = 0; j < key.length(); j++)
+            {
+                if(temp[i+j] == key[j])
+                    temp[i+j] = '0';
+                else
+                    temp[i+j] = '1';
+            }
+        }
+    }
+
+    remainder = temp.substr(received.length() - key.length() + 1);
+
+    bool error = false;
+
+    for(int i = 0; i < remainder.length(); i++)
+    {
+        if(remainder[i] == '1')
+        {
+            error = true;
+            break;
+        }
+    }
+
+    if(error)
+        cout << "Error Detected";
+    else
+        cout << "No Error Detected";
+
+    return 0;
+}
+
+Enter data: 1001
+Enter generator: 1101
+
+CRC Remainder = 011
+Data Sent = 1001011
+Enter received data: 1001011
+
+
+2]Enter data: 1001
+Enter generator: 1101
+CRC Remainder = 011
+Data Sent = 1001011
+Enter received data: 1000011
+Error Detected
+
+My practical is Cyclic Redundancy Check, or CRC, which is an error detection technique. In CRC, we use a generator or divisor and perform modulo-2 division using XOR operation.
+
+First, I take the original binary data and the generator as input. Then I append zeros to the data. The number of zeros is one less than the length of the generator.
+
+After that, I perform modulo-2 division. Whenever the current bit is 1, I perform XOR with the generator. The remaining bits after the division form the CRC remainder. I append this remainder to the original data and obtain the transmitted data.
+
+At the receiver side, I take the received data and again perform the same division using the same generator. If the final remainder is all zeros, no error is detected. If the remainder contains any 1, an error is detected.
+
+For example, if my data is 1001 and generator is 1101, the CRC remainder is 011, so the data sent is 1001011. If the receiver gets 1001011, there is no error. If one bit changes and the receiver gets 1000011, a non-zero remainder is obtained and an error is detected.

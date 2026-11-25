@@ -1,0 +1,111 @@
+4B — Go-Back-N ARQ
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int totalFrames, windowSize;
+
+    cout << "Enter number of frames: ";
+    cin >> totalFrames;
+
+    cout << "Enter window size: ";
+    cin >> windowSize;
+
+    int currentFrame = 1;
+
+    while(currentFrame <= totalFrames)
+    {
+        int end = currentFrame + windowSize - 1;
+
+        if(end > totalFrames)
+            end = totalFrames;
+
+        cout << "\nSending Frames "
+             << currentFrame << " to " << end << endl;
+
+        int errorFrame = 0;
+
+        for(int i = currentFrame; i <= end; i++)
+        {
+            int choice;
+
+            cout << "Frame " << i << " sent." << endl;
+
+            cout << "Enter 1 for successful, 0 for error: ";
+            cin >> choice;
+
+            if(choice == 0)
+            {
+                cout << "Frame " << i << " lost/corrupted." << endl;
+                cout << "Receiver discards this frame and following frames."
+                     << endl;
+
+                errorFrame = i;
+                break;
+            }
+            else
+            {
+                cout << "Frame " << i << " received successfully." << endl;
+                cout << "ACK " << i << " sent." << endl;
+            }
+        }
+
+        if(errorFrame != 0)
+        {
+            cout << "\nTimeout occurred." << endl;
+            cout << "Going back to Frame " << errorFrame << endl;
+
+            cout << "Retransmitting Frame "
+                 << errorFrame << " and following frames."
+                 << endl;
+
+            currentFrame = errorFrame;
+        }
+        else
+        {
+            cout << "\nAll frames in current window acknowledged."
+                 << endl;
+
+            currentFrame = end + 1;
+        }
+    }
+
+    cout << "\nAll frames sent successfully using Go-Back-N ARQ."
+         << endl;
+
+    return 0;
+}
+
+
+Enter number of frames: 5
+Enter window size: 3
+
+Frame 1: 1
+Frame 2: 1
+Frame 3: 1
+Frame 4: 1
+Frame 5: 1
+
+
+Frames = 5
+Window = 3
+
+
+My practical is implementation of Sliding Window mechanism using Go-Back-N ARQ.”
+
+“ARQ stands for Automatic Repeat reQuest. Go-Back-N ARQ is an error-control protocol in which the sender can send multiple frames using a sliding window.”
+
+“First, my program takes the total number of frames and the window size as input. I initialize the current frame to 1.”
+
+“I calculate the end of the current window using current frame plus window size minus 1. Then I send all the frames present in that window.”
+
+“For every frame, I simulate whether the frame is successfully received or an error occurs. If the frame is received successfully, the receiver sends an acknowledgement.”
+
+“If a frame is lost or corrupted, the receiver discards that frame and the following frames. A timeout occurs at the sender, and the sender goes back to the erroneous frame.”
+
+“The sender then retransmits the erroneous frame and the following frames. This is why the protocol is called Go-Back-N.”
+
+“If there is no error in the complete window, all frames are acknowledged and the window slides forward to the next frames.”
+
+“Thus, the program successfully implements Go-Back-N ARQ using the sliding window mechanism.

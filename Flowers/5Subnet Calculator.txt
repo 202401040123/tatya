@@ -1,0 +1,108 @@
+5Subnet Calculator
+
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int ip[4], mask[4];
+    int prefix;
+
+    cout << "Enter IP address: ";
+    cin >> ip[0] >> ip[1] >> ip[2] >> ip[3];
+
+    cout << "Enter CIDR prefix: ";
+    cin >> prefix;
+
+    // Find subnet mask
+    for(int i = 0; i < 4; i++)
+    {
+        if(prefix >= 8)
+        {
+            mask[i] = 255;
+            prefix = prefix - 8;
+        }
+        else if(prefix > 0)
+        {
+            mask[i] = 256 - (1 << (8 - prefix));
+            prefix = 0;
+        }
+        else
+        {
+            mask[i] = 0;
+        }
+    }
+
+    // Find network address
+    int network[4];
+
+    for(int i = 0; i < 4; i++)
+    {
+        network[i] = ip[i] & mask[i];
+    }
+
+    // Find broadcast address
+    int broadcast[4];
+
+    for(int i = 0; i < 4; i++)
+    {
+        broadcast[i] = network[i] | (255 - mask[i]);
+    }
+
+    cout << "\nSubnet Mask: ";
+    for(int i = 0; i < 4; i++)
+    {
+        cout << mask[i];
+        if(i < 3)
+            cout << ".";
+    }
+
+    cout << "\nNetwork Address: ";
+    for(int i = 0; i < 4; i++)
+    {
+        cout << network[i];
+        if(i < 3)
+            cout << ".";
+    }
+
+    cout << "\nBroadcast Address: ";
+    for(int i = 0; i < 4; i++)
+    {
+        cout << broadcast[i];
+        if(i < 3)
+            cout << ".";
+    }
+
+    return 0;
+}
+
+Enter IP address: 192 168 1 10
+Enter CIDR prefix: 24
+
+My practical is Subnet Calculator.
+
+First, I take the four parts of the IP address as input and also take the CIDR prefix.
+
+The CIDR prefix tells us how many bits belong to the network part.
+
+I use a loop to calculate the subnet mask. For every complete 8 bits, the mask value is 255. The remaining bits are calculated separately.
+
+After getting the subnet mask, I calculate the network address using bitwise AND between the IP address and subnet mask.
+
+Then I calculate the broadcast address by keeping the network part same and making the host bits 1.
+
+Finally, the program displays the subnet mask, network address and broadcast address.
+
+For example, for 192.168.1.10 with /24, the subnet mask is 255.255.255.0, the network address is 192.168.1.0 and the broadcast address is 192.168.1.255.
+
+
+
+Network = IP AND Mask
+For /24:
+IP:    192 168 1 10
+Mask:  255 255 255 0
+       ----------------
+Network: 192 168 1 0
+
+So first 3 parts remain the same, last part becomes 0.
+

@@ -1,0 +1,99 @@
+4c Selective Repeat ARQ
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int totalFrames, windowSize;
+
+    cout << "Enter number of frames: ";
+    cin >> totalFrames;
+
+    cout << "Enter window size: ";
+    cin >> windowSize;
+
+    int currentFrame = 1;
+
+    while(currentFrame <= totalFrames)
+    {
+        int end = currentFrame + windowSize - 1;
+
+        if(end > totalFrames)
+            end = totalFrames;
+
+        cout << "\nSending Frames "
+             << currentFrame << " to " << end << endl;
+
+        int errorFrame = 0;
+
+        for(int i = currentFrame; i <= end; i++)
+        {
+            int choice;
+
+            cout << "Frame " << i << " sent." << endl;
+            cout << "Enter 1 for successful, 0 for error: ";
+            cin >> choice;
+
+            if(choice == 0)
+            {
+                cout << "Frame " << i << " lost/corrupted." << endl;
+                cout << "Receiver accepts and stores other correct frames."
+                     << endl;
+
+                errorFrame = i;
+            }
+            else
+            {
+                cout << "Frame " << i << " received successfully." << endl;
+                cout << "ACK " << i << " sent." << endl;
+            }
+        }
+
+        if(errorFrame != 0)
+        {
+            cout << "\nTimeout for Frame " << errorFrame << endl;
+            cout << "Retransmitting ONLY Frame "
+                 << errorFrame << endl;
+
+            cout << "ACK " << errorFrame << " received." << endl;
+        }
+
+        currentFrame = end + 1;
+    }
+
+    cout << "\nAll frames sent successfully using Selective Repeat ARQ."
+         << endl;
+
+    return 0;
+}
+
+
+Enter number of frames: 5
+Enter window size: 3
+
+Frame 1: 1
+Frame 2: 1
+Frame 3: 0
+Frame 4: 1
+Frame 5: 1
+
+
+
+My practical is implementation of Sliding Window mechanism using Selective Repeat ARQ.
+
+ARQ stands for Automatic Repeat reQuest. Selective Repeat ARQ is a sliding window protocol in which multiple frames can be sent at the same time.
+
+First, my program takes the total number of frames and the window size as input. I initialize the current frame to 1 and create the current sliding window.
+
+The sender sends all frames present in the window. If a frame is received correctly, the receiver sends an acknowledgement for that frame.
+
+If a frame is lost or corrupted, the receiver can still accept and store the other correctly received frames. A timeout occurs for the particular erroneous frame.
+
+The sender then retransmits only the lost or corrupted frame, not the following frames. This is the main feature of Selective Repeat ARQ.
+
+After receiving the acknowledgement for the retransmitted frame, the window moves forward and the next frames are sent.
+
+Thus, the program implements Selective Repeat ARQ, where only the erroneous frame is retransmitted.
+
+
+

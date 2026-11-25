@@ -1,0 +1,214 @@
+g++ --version
+
+g++ TCPServer.cpp -o TCPServer.exe -lws2_32
+g++ TCPClient.cpp -o TCPClient.exe -lws2_32
+
+g++ UDPServer.cpp -o UDPServer.exe -lws2_32
+g++ UDPClient.cpp -o UDPClient.exe -lws2_32
+
+
+
+.\TCPServer.exe
+.\TCPClient.exe
+
+
+1. TCP Server — TCPServer.cpp
+#include <iostream>
+#include <winsock2.h>
+using namespace std;
+
+int main()
+{
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2,2), &wsa);
+
+    SOCKET server, client;
+    char message[100];
+
+    server = socket(AF_INET, SOCK_STREAM, 0);
+
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(9090);
+    addr.sin_addr.s_addr = INADDR_ANY;
+
+    bind(server, (sockaddr*)&addr, sizeof(addr));
+
+    listen(server, 1);
+
+    cout << "Server waiting..." << endl;
+
+    client = accept(server, NULL, NULL);
+
+    recv(client, message, sizeof(message), 0);
+
+    cout << "Client: " << message << endl;
+
+    send(client, "Hello Client", 12, 0);
+
+    closesocket(client);
+    closesocket(server);
+    WSACleanup();
+
+    return 0;
+}
+
+2. TCP Client — TCPClient.cpp
+
+#include <iostream>
+#include <winsock2.h>
+using namespace std;
+
+int main()
+{
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2,2), &wsa);
+
+    SOCKET client;
+    char message[100];
+
+    client = socket(AF_INET, SOCK_STREAM, 0);
+
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(9090);
+    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    connect(client, (sockaddr*)&addr, sizeof(addr));
+
+    send(client, "Hello Server", 13, 0);
+
+    recv(client, message, sizeof(message), 0);
+
+    cout << "Server: " << message << endl;
+
+    closesocket(client);
+    WSACleanup();
+
+    return 0;
+}
+
+
+g++ TCPServer.cpp -o server.exe -lws2_32
+.\server.exe
+
+g++ TCPClient.cpp -o client.exe -lws2_32
+.\client.exe
+
+
+
+
+3. UDP Server — UDPServer.cpp
+
+#include <iostream>
+#include <winsock2.h>
+using namespace std;
+
+int main()
+{
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2,2), &wsa);
+
+    SOCKET server;
+    char message[100];
+
+    server = socket(AF_INET, SOCK_DGRAM, 0);
+
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(9091);
+    addr.sin_addr.s_addr = INADDR_ANY;
+
+    bind(server, (sockaddr*)&addr, sizeof(addr));
+
+    cout << "UDP Server waiting..." << endl;
+
+    sockaddr_in client;
+    int size = sizeof(client);
+
+    recvfrom(server, message, sizeof(message), 0,
+             (sockaddr*)&client, &size);
+
+    cout << "Client: " << message << endl;
+
+    sendto(server, "Hello Client", 12, 0,
+           (sockaddr*)&client, size);
+
+    closesocket(server);
+    WSACleanup();
+
+    return 0;
+}
+
+
+4. UDP Client — UDPClient.cpp
+#include <iostream>
+#include <winsock2.h>
+using namespace std;
+
+int main()
+{
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2,2), &wsa);
+
+    SOCKET client;
+    char message[100];
+
+    client = socket(AF_INET, SOCK_DGRAM, 0);
+
+    sockaddr_in server;
+    server.sin_family = AF_INET;
+    server.sin_port = htons(9091);
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    sendto(client, "Hello Server", 13, 0,
+           (sockaddr*)&server, sizeof(server));
+
+    int size = sizeof(server);
+
+    recvfrom(client, message, sizeof(message), 0,
+             (sockaddr*)&server, &size);
+
+    cout << "Server: " << message << endl;
+
+    closesocket(client);
+    WSACleanup();
+
+    return 0;
+}
+
+g++ UDPServer.cpp -o udpserver.exe -lws2_32
+.\udpserver.exe
+
+g++ UDPClient.cpp -o udpclient.exe -lws2_32
+.\udpclient.exe
+
+
+
+“My practical is to implement client-server communication using socket programming in C++ using TCP and UDP.
+
+A socket is an endpoint used for communication between two computers or programs. In client-server communication, the server waits for the client, and the client sends a request or message to the server.
+
+First, I implement TCP communication.
+
+TCP stands for Transmission Control Protocol. It is connection-oriented and reliable. This means a connection is established between the client and server before communication.
+
+In my TCP server, I first initialize Winsock using WSAStartup(). Then I create a socket using socket(). I assign the IP address and port number using sockaddr_in. I use bind() to attach the socket to the port. Then I use listen() so the server can wait for a client, and accept() to accept the connection.
+
+After the connection is established, the server uses recv() to receive the client's message and send() to send a reply.
+
+In the TCP client, I create a socket and use connect() to connect to the server using the local IP address 127.0.0.1 and port 9090. Then I use send() to send Hello Server and recv() to receive the server's reply.
+
+Now I implement UDP communication.
+
+UDP stands for User Datagram Protocol. It is connectionless, so it does not establish a connection before sending data.
+
+In the UDP server, I create a socket using socket() with SOCK_DGRAM. I use bind() to assign port number 9091. Then I use recvfrom() to receive the message from the client and sendto() to send the reply.
+
+In the UDP client, I create a UDP socket and use sendto() to send the message to the server. Then I use recvfrom() to receive the server's reply.
+
+The main difference is that TCP is connection-oriented and reliable, whereas UDP is connectionless and does not guarantee delivery.
+
+Therefore, my program successfully demonstrates client-server communication using both TCP and UDP socket programming.
+
+

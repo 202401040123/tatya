@@ -1,0 +1,118 @@
+7 Link State Routing
+
+
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int n, source;
+    int cost[10][10];
+    int dist[10];
+    bool visited[10];
+
+    cout << "Enter number of routers: ";
+    cin >> n;
+
+    cout << "Enter cost matrix:\n";
+
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            cin >> cost[i][j];
+        }
+    }
+
+    cout << "Enter source router: ";
+    cin >> source;
+
+    source--;
+
+    for(int i = 0; i < n; i++)
+    {
+        dist[i] = cost[source][i];
+        visited[i] = false;
+    }
+
+    dist[source] = 0;
+
+    for(int count = 0; count < n - 1; count++)
+    {
+        int min = 999;
+        int u = -1;
+
+        // Find nearest router
+        for(int i = 0; i < n; i++)
+        {
+            if(!visited[i] && dist[i] < min)
+            {
+                min = dist[i];
+                u = i;
+            }
+        }
+
+        visited[u] = true;
+
+        // Update distances
+        for(int i = 0; i < n; i++)
+        {
+            if(!visited[i] &&
+               dist[u] + cost[u][i] < dist[i])
+            {
+                dist[i] = dist[u] + cost[u][i];
+            }
+        }
+    }
+
+    cout << "\nShortest distances from Router "
+         << source + 1 << ":\n";
+
+    for(int i = 0; i < n; i++)
+    {
+        cout << "Router " << i + 1
+             << " = " << dist[i] << endl;
+    }
+
+    return 0;
+}
+
+
+Enter number of routers: 3
+
+Enter cost matrix:
+0 2 5
+2 0 1
+5 1 0
+
+Enter source router: 1
+
+
+Shortest distances from Router 1:
+Router 1 = 0
+Router 2 = 2
+Router 3 = 3
+
+
+
+“My practical is Link State Routing.
+
+Link State Routing uses Dijkstra's shortest path algorithm to find the shortest path from one router to all other routers.
+
+First, my program takes the number of routers and the cost matrix as input. Then I select the source router.
+
+Initially, the distance from the source router to every other router is taken from the cost matrix.
+
+Then I select the unvisited router having the minimum distance.
+
+I mark that router as visited and check whether going through this router gives a shorter path to the other routers.
+
+If a shorter path is found, I update the distance.
+
+This process continues until all routers are visited.
+
+Finally, the program displays the shortest distance from the selected source router to every other router.
+
+Therefore, this program implements Link State Routing using Dijkstra's shortest path algorithm.”
+
+

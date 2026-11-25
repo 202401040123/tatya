@@ -1,0 +1,91 @@
+6 Distance Vector Routing
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int n;
+    int cost[10][10], dist[10][10];
+
+    cout << "Enter number of routers: ";
+    cin >> n;
+
+    cout << "Enter cost matrix:\n";
+
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            cin >> cost[i][j];
+            dist[i][j] = cost[i][j];
+        }
+    }
+
+    // Update distance table
+    for(int k = 0; k < n; k++)
+    {
+        for(int i = 0; i < n; i++)
+        {
+            for(int j = 0; j < n; j++)
+            {
+                if(dist[i][k] + dist[k][j] < dist[i][j])
+                {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+    }
+
+    cout << "\nFinal Distance Table:\n";
+
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
+        {
+            cout << dist[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
+
+
+Enter number of routers: 3
+
+Enter cost matrix:
+0 2 5
+2 0 1
+5 1 0
+
+Final Distance Table:
+0 2 3
+2 0 1
+3 1 0
+
+
+My practical is Distance Vector Routing.
+
+Distance Vector Routing is a routing algorithm based on the Bellman-Ford algorithm. Each router maintains the cost or distance to other routers.
+
+First, my program takes the number of routers and the cost matrix as input.
+
+Initially, the distance table contains the direct link costs.
+
+Then the program checks whether a shorter path is available through another router.
+
+If a shorter path is found, the distance is updated.
+
+This process is repeated for all routers until the shortest distances are obtained.
+
+Finally, the program displays the final distance table.
+
+For example, if Router 1 can reach Router 3 directly with cost 5, but it can reach Router 3 through Router 2 with cost 2 + 1 = 3, the program updates the cost from 5 to 3.
+
+Therefore, Distance Vector Routing finds the shortest path between routers using distance information.
+
+
+
+
+
+

@@ -1,0 +1,91 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main()
+{
+    string data, received;
+    int h[8];
+
+    // Take 4 data bits
+    cout << "Enter 4-bit data: ";
+    cin >> data;
+
+    // Put data bits in positions 3, 5, 6, 7
+    h[3] = data[0] - '0';
+    h[5] = data[1] - '0';
+    h[6] = data[2] - '0';
+    h[7] = data[3] - '0';
+
+    // Calculate parity bits
+    h[1] = (h[3] + h[5] + h[7]) % 2;
+    h[2] = (h[3] + h[6] + h[7]) % 2;
+    h[4] = (h[5] + h[6] + h[7]) % 2;
+
+    // Display Hamming code
+    cout << "Hamming Code = ";
+
+    for(int i = 1; i <= 7; i++)
+        cout << h[i];
+
+    cout << endl;
+
+    // Take received code
+    cout << "Enter received 7-bit code: ";
+    cin >> received;
+
+    // Store received bits
+    for(int i = 1; i <= 7; i++)
+        h[i] = received[i-1] - '0';
+
+    // Calculate error bits
+    int p1 = (h[1] + h[3] + h[5] + h[7]) % 2;
+    int p2 = (h[2] + h[3] + h[6] + h[7]) % 2;
+    int p4 = (h[4] + h[5] + h[6] + h[7]) % 2;
+
+    // Find error position
+    int error = p1 * 1 + p2 * 2 + p4 * 4;
+
+    if(error == 0)
+    {
+        cout << "No Error Detected" << endl;
+    }
+    else
+    {
+        cout << "Error at position: " << error << endl;
+
+        // Correct the error
+        h[error] = 1 - h[error];
+
+        cout << "Corrected Code = ";
+
+        for(int i = 1; i <= 7; i++)
+            cout << h[i];
+
+        cout << endl;
+    }
+
+    return 0;
+}
+
+
+Enter 4-bit data: 1011
+Hamming Code = 0110011
+Enter received 7-bit code: 0110011
+No Error Detected
+
+Enter 4-bit data: 1011
+Hamming Code = 0110011
+Enter received 7-bit code: 0110111
+Error at position: 5
+Corrected Code = 0110011
+
+My practical is Hamming Code for detection and correction of a single-bit error. Hamming Code adds extra parity bits to the original data. For 4 data bits, we use 3 parity bits, so the total Hamming code contains 7 bits.
+
+The parity bits are placed at positions 1, 2 and 4 because these are powers of 2. The data bits are placed at positions 3, 5, 6 and 7.
+
+P1 checks positions 1, 3, 5 and 7. P2 checks positions 2, 3, 6 and 7. P4 checks positions 4, 5, 6 and 7. I use even parity.
+
+At the receiver side, I again calculate these three parity checks. The results P4, P2 and P1 form a binary number called the syndrome. If the syndrome is 000, there is no error. If it is non-zero, its decimal value gives the position of the error. I then flip that bit to correct the error.
+
+For example, for data 1011, the Hamming code generated is 0110011. If the receiver receives 0110111, the syndrome gives position 5. Therefore bit 5 is wrong. I flip bit 5 and get the corrected code 0110011.

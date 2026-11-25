@@ -1,0 +1,75 @@
+Practical 4A — Stop and Wait ARQ
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int totalFrames;
+    int choice;
+
+    cout << "Enter number of frames: ";
+    cin >> totalFrames;
+
+    for(int frame = 1; frame <= totalFrames; )
+    {
+        cout << "\nSending Frame " << frame << endl;
+
+        cout << "Enter 1 if ACK received, 0 if error/timeout: ";
+        cin >> choice;
+
+        if(choice == 1)
+        {
+            cout << "ACK " << frame << " received." << endl;
+            cout << "Frame " << frame << " sent successfully." << endl;
+
+            frame++;
+        }
+        else
+        {
+            cout << "Error/Timeout for Frame " << frame << endl;
+            cout << "Retransmitting Frame " << frame << "..." << endl;
+        }
+    }
+
+    cout << "\nAll frames sent successfully." << endl;
+
+    return 0;
+}
+
+Enter number of frames: 3
+
+Sending Frame 1
+Enter 1 if ACK received, 0 if error/timeout: 1
+
+
+Enter number of frames: 3
+
+Sending Frame 1
+Enter 1 if ACK received, 0 if error/timeout: 1
+ACK 1 received.
+Frame 1 sent successfully.
+
+Sending Frame 2
+Enter 1 if ACK received, 0 if error/timeout: 0
+Error/Timeout for Frame 2
+Retransmitting Frame 2...
+
+Sending Frame 2
+Enter 1 if ACK received, 0 if error/timeout: 1
+ACK 2 received.
+Frame 2 sent successfully.
+
+Sending Frame 3
+Enter 1 if ACK received, 0 if error/timeout: 1
+ACK 3 received.
+Frame 3 sent successfully.
+
+All frames sent successfully.
+
+Stop-and-Wait ARQ is an error control protocol used for reliable data transmission. ARQ stands for Automatic Repeat reQuest. In Stop-and-Wait, the sender sends only one frame at a time and waits for an acknowledgement from the receiver before sending the next frame.
+
+If the receiver successfully receives the frame, it sends an ACK. The sender receives the ACK and sends the next frame. If the frame is lost, corrupted, or the ACK is not received within the expected time, a timeout occurs and the sender retransmits the same frame.
+
+In my program, I first take the total number of frames. I send one frame and ask whether its ACK was received. If the ACK is received, I increment the frame number and send the next frame. If an error or timeout occurs, I do not increment the frame number, so the same frame is retransmitted.
+
+Therefore, the basic working is: Send Frame, Wait for ACK, if ACK is received send the next frame, otherwise retransmit the same frame.
