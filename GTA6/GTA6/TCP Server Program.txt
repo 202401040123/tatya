@@ -1,0 +1,47 @@
+
+#include <iostream>
+#include <cstring>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+using namespace std;
+
+int main() {
+    int server, client;
+    char buffer[1024];
+
+    // Create socket
+    server = socket(AF_INET, SOCK_STREAM, 0);
+
+    sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_port = htons(8080);
+    address.sin_addr.s_addr = INADDR_ANY;
+
+    // Bind socket
+    bind(server, (struct sockaddr*)&address, sizeof(address));
+
+    // Listen for clients
+    listen(server, 5);
+
+    cout << "Server waiting for client..." << endl;
+
+    // Accept client
+    socklen_t len = sizeof(address);
+    client = accept(server, (struct sockaddr*)&address, &len);
+
+    cout << "Client connected!" << endl;
+
+    // Receive message
+    recv(client, buffer, sizeof(buffer), 0);
+    cout << "Client: " << buffer << endl;
+
+    // Send message
+    char msg[] = "Hello Client!";
+    send(client, msg, strlen(msg), 0);
+
+    close(client);
+    close(server);
+
+    return 0;
+}

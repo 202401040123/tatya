@@ -1,0 +1,76 @@
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n, source;
+
+    int cost[10][10], dist[10], visited[10] = {0};
+
+    // Input: 4 routers
+    // 0 2 999 1
+    // 2 0 3 999
+    // 999 3 0 4
+    // 1 999 4 0
+    // Source: 1
+
+    cout << "Enter number of routers: ";
+    cin >> n;
+
+    cout << "Enter cost matrix (999 for infinity):\n";
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cin >> cost[i][j];
+        }
+    }
+
+    cout << "Enter source router: ";
+    cin >> source;
+
+    source--;
+
+    for (int i = 0; i < n; i++) {
+        dist[i] = cost[source][i];
+    }
+
+    dist[source] = 0;
+
+    for (int count = 0; count < n; count++) {
+
+        int minDist = 999;
+        int u = -1;
+
+        for (int i = 0; i < n; i++) {
+
+            if (visited[i] == 0 && dist[i] < minDist) {
+                minDist = dist[i];
+                u = i;
+            }
+        }
+
+        if (u == -1)
+            break;
+
+        visited[u] = 1;
+
+        for (int v = 0; v < n; v++) {
+
+            if (visited[v] == 0 && cost[u][v] != 999 &&
+                dist[u] + cost[u][v] < dist[v]) {
+
+                dist[v] = dist[u] + cost[u][v];
+            }
+        }
+    }
+
+    cout << "\nShortest Distances from Router "
+         << source + 1 << endl;
+
+    for (int i = 0; i < n; i++) {
+        cout << "Router " << i + 1
+             << " : " << dist[i] << endl;
+    }
+
+    return 0;
+}

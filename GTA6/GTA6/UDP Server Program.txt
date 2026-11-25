@@ -1,0 +1,42 @@
+
+#include <iostream>
+#include <cstring>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+using namespace std;
+
+int main() {
+    int server;
+    char buffer[1024] = {0};
+
+    // Create socket
+    server = socket(AF_INET, SOCK_DGRAM, 0);
+
+    sockaddr_in address, client;
+    address.sin_family = AF_INET;
+    address.sin_port = htons(8080);
+    address.sin_addr.s_addr = INADDR_ANY;
+
+    // Bind socket
+    bind(server, (struct sockaddr*)&address, sizeof(address));
+
+    cout << "UDP Server waiting..." << endl;
+
+    socklen_t len = sizeof(client);
+
+    // Receive message
+    recvfrom(server, buffer, sizeof(buffer), 0,
+             (struct sockaddr*)&client, &len);
+
+    cout << "Client: " << buffer << endl;
+
+    // Send message
+    char msg[] = "Hello Client!";
+    sendto(server, msg, strlen(msg), 0,
+           (struct sockaddr*)&client, len);
+
+    close(server);
+
+    return 0;
+}

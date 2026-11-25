@@ -1,0 +1,50 @@
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n, w, lost;
+
+    // Input: n = 6, window = 3, lost = 2
+    cout << "Enter number of frames: ";
+    cin >> n;
+
+    cout << "Enter window size: ";
+    cin >> w;
+
+    cout << "Enter lost frame (0 for none): ";
+    cin >> lost;
+
+    for (int i = 1; i <= n; i = i + w) {
+
+        int end = i + w - 1;
+
+        if (end > n)
+            end = n;
+
+        cout << "\nSending Frames: ";
+
+        for (int j = i; j <= end; j++)
+            cout << j << " ";
+
+        cout << endl;
+
+        for (int j = i; j <= end; j++) {
+
+            if (j == lost) {
+
+                cout << "Frame " << j << " Lost!" << endl;
+                cout << "Retransmitting Frame " << j << endl;
+                cout << "ACK Received for Frame " << j << endl;
+            }
+
+            else {
+                cout << "ACK Received for Frame " << j << endl;
+            }
+        }
+    }
+
+    cout << "\nTransmission Completed";
+
+    return 0;
+}

@@ -1,0 +1,98 @@
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int m, r = 0;
+
+    // Input: 4 data bits = 1 0 1 1
+    cout << "Enter number of data bits: ";
+    cin >> m;
+
+    int data[20], code[30] = {0};
+
+    cout << "Enter data bits: ";
+
+    for (int i = 0; i < m; i++)
+        cin >> data[i];
+
+    while ((1 << r) < m + r + 1)
+        r++;
+
+    int n = m + r;
+    int j = 0;
+
+    // Insert data bits
+    for (int i = 1; i <= n; i++) {
+
+        if (i == 1 || i == 2 || i == 4 || i == 8)
+            continue;
+
+        code[i] = data[j];
+        j++;
+    }
+
+    // Calculate parity bits
+    for (int i = 0; i < r; i++) {
+
+        int p = 1 << i;
+        int parity = 0;
+
+        for (int k = 1; k <= n; k++) {
+
+            if ((k & p) != 0 && k != p)
+                parity = parity ^ code[k];
+        }
+
+        code[p] = parity;
+    }
+
+    cout << "Transmitted Code: ";
+
+    for (int i = 1; i <= n; i++)
+        cout << code[i];
+
+    // Input: 1011101 (simulates error at position 4)
+    cout << "\nEnter received bits: ";
+
+    for (int i = 1; i <= n; i++)
+        cin >> code[i];
+
+    int errorPos = 0;
+
+    // Find error position
+    for (int i = 0; i < r; i++) {
+
+        int p = 1 << i;
+        int parity = 0;
+
+        for (int k = 1; k <= n; k++) {
+
+            if ((k & p) != 0)
+                parity = parity ^ code[k];
+        }
+
+        if (parity == 1)
+            errorPos += p;
+    }
+
+    if (errorPos == 0) {
+        cout << "No Error Detected";
+    }
+    else if (errorPos <= n) {
+
+        cout << "Error at position: " << errorPos;
+
+        code[errorPos] = 1 - code[errorPos];
+
+        cout << "\nCorrected Code: ";
+
+        for (int i = 1; i <= n; i++)
+            cout << code[i];
+    }
+    else {
+        cout << "Invalid error position";
+    }
+
+    return 0;
+}

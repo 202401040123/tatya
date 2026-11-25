@@ -1,0 +1,47 @@
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string data, received;
+    int count = 0;
+
+    // Input: 1011
+    cout << "Enter data bits: ";
+    cin >> data;
+
+    for (int i = 0; i < data.length(); i++) {
+        if (data[i] == '1')
+            count++;
+    }
+
+    char parity;
+
+    if (count % 2 == 0)
+        parity = '0';
+    else
+        parity = '1';
+
+    string transmitted = data + parity;
+
+    cout << "Transmitted Data: " << transmitted << endl;
+
+    // Input: 10011 (simulates an error)
+    cout << "Enter received data: ";
+    cin >> received;
+
+    count = 0;
+
+    for (int i = 0; i < received.length(); i++) {
+        if (received[i] == '1')
+            count++;
+    }
+
+    if (count % 2 == 0)
+        cout << "No Error Detected";
+    else
+        cout << "Error Detected";
+
+    return 0;
+}
